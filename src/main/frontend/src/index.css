@@ -540,6 +540,14 @@ code, pre, .mono {
   z-index: 1;
 }
 
+.glass-card > *:has(.gadget-dropdown) {
+  z-index: 9999 !important;
+}
+
+.glass-card:has(.gadget-dropdown) {
+  overflow: visible !important;
+}
+
 .glass-card:hover {
   box-shadow: var(--card-shadow-lg);
   transform: translateY(-2px);
@@ -1358,6 +1366,102 @@ label.form-group {
   height: 14px;
   margin: 0;
   flex-shrink: 0;
+}
+
+.execution-modes {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: rgba(120, 120, 128, 0.04);
+}
+
+.execution-modes legend {
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.execution-mode-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.execution-mode-list .adv-check {
+  padding: 0;
+}
+
+.execution-mode-list input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.execution-mode-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+  line-height: 1;
+  cursor: help;
+  opacity: 0.65;
+}
+
+.execution-mode-description,
+.command-hint {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.execution-mode-description {
+  margin-top: 8px;
+}
+
+.command-hint {
+  margin: -8px 0 12px;
+}
+
+.language-switcher {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow-sm);
+  backdrop-filter: blur(8px);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.language-switcher select {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.language-switcher select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 select {

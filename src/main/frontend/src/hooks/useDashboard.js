@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { buildExecutionCommand, EXECUTION_MODES, getExecutionMode } from '../utils/execution'
 import {
   getStatus, toggleServer, getGadgets,
   generatePayload as apiGenerate, updateConfig, setAuthToken, getLogs,
@@ -26,6 +27,10 @@ export default function useDashboard() {
   const [gadgetSearch, setGadgetSearch] = useState('')
   const [selectedGadget, setSelectedGadget] = useState('')
   const [payloadCmd, setPayloadCmd] = useState('')
+  const [executionMode, setExecutionMode] = useState(() => {
+    const saved = localStorage.getItem('jyso_execution_mode') || ''
+    return EXECUTION_MODES.some(mode => mode.value === saved) ? saved : ''
+  })
   const [payloadResult, setPayloadResult] = useState('')
   const [encodeBase64, setEncodeBase64] = useState(true)
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -135,7 +140,8 @@ export default function useDashboard() {
     if (!gadgetName) return
     setLoading(true)
     try {
-      const res = await apiGenerate({ gadget: gadgetName, command: payloadCmd, filename: saveFilename, encodeBase64,
+      const command = buildExecutionCommand(payloadCmd, executionMode)
+      const res = await apiGenerate({ gadget: gadgetName, command, filename: saveFilename, encodeBase64,
         inherit, obscure, dcfp, dirtyType, dirtyLength, noComSun, mozillaClassLoader, rhino, utf8Overlong })
       if (res.data.success) {
         setPayloadResult(res.data.message || 'Payload generated successfully')
@@ -211,6 +217,10 @@ export default function useDashboard() {
       console.error('Failed to fetch logs:', e)
     } finally { setLogLoading(false) }
   }
+
+  useEffect(() => {
+    localStorage.setItem('jyso_execution_mode', executionMode)
+  }, [executionMode])
 
   useEffect(() => { loadStatus(); loadGadgets() }, [])
 
@@ -321,6 +331,7 @@ export default function useDashboard() {
     activeJndiTab, setActiveJndiTab,
     gadgets, gadgetSearch, setGadgetSearch, selectedGadget, setSelectedGadget, filteredGadgets,
     payloadCmd, setPayloadCmd, payloadResult, setPayloadResult,
+    executionMode, setExecutionMode, executionModeConfig: getExecutionMode(executionMode),
     encodeBase64, setEncodeBase64,
     showAdvanced, setShowAdvanced,
     inherit, setInherit, obscure, setObscure,

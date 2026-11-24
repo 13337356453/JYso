@@ -3,22 +3,26 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import UserInfo from './pages/UserInfo'
 import ProtectedRoute from './components/ProtectedRoute'
+import LanguageSwitcher from './components/LanguageSwitcher'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/user-info" element={
-        <ProtectedRoute>
-          <UserInfo />
-        </ProtectedRoute>
-      } />
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/user-info" element={
+          <ProtectedRoute>
+            <UserInfo />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+      </Routes>
+      <LanguageSwitcher />
+    </>
   )
 }

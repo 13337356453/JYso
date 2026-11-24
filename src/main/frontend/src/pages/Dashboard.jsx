@@ -5,6 +5,9 @@ import ServerStatusCard from '../components/ServerStatusCard'
 import GadgetSelector from '../components/GadgetSelector'
 import PayloadOutput from '../components/PayloadOutput'
 import ConfigForm from '../components/ConfigForm'
+import ExecutionModeSelector from '../components/ExecutionModeSelector'
+import { useLanguage } from '../context/LanguageContext'
+import { getExecutionMode } from '../utils/execution'
 
 const ExternalLinkIcon = () => (
   <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
@@ -73,8 +76,10 @@ const LogoutIcon = () => (
 
 export default function Dashboard() {
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const d = useDashboard()
   const [sidebarHidden, setSidebarHidden] = useState(true)
+  const executionMode = getExecutionMode(d.executionMode)
 
   useEffect(() => {
     function handleMouseMove(e) {
@@ -94,18 +99,18 @@ export default function Dashboard() {
   async function handleToggleServer(server) {
     await d.handleToggleServer(server)
     const isRunning = d.status[server + 'Running']
-    showToast(`${server.toUpperCase()} ${isRunning ? 'stopped' : 'started'}`, 'success')
+    showToast(t(isRunning ? 'server.stopped' : 'server.started', { server: server.toUpperCase() }), 'success')
   }
 
   async function handleSaveConfig() {
     await d.handleSaveConfig()
-    showToast('Configuration saved', 'success')
+    showToast(t('config.saved'), 'success')
   }
 
   async function handleGeneratePayload() {
     await d.handleGeneratePayload()
     if (d.payloadResult && !d.payloadResult.startsWith('Error')) {
-      showToast('Payload generated', 'success')
+      showToast(t('payload.generated'), 'success')
     } else if (d.payloadResult?.startsWith('Error')) {
       showToast(d.payloadResult, 'error')
     }
@@ -114,14 +119,14 @@ export default function Dashboard() {
   function handleGenerateJndiPayload() {
     d.handleGenerateJndiPayload()
     if (d.jndiPayloadResult) {
-      showToast('Payload URLs generated', 'success')
+      showToast(t('payload.urlsGenerated'), 'success')
     }
   }
 
   function handleGenerateClassLoader() {
     d.handleGenerateClassLoader()
     if (d.classLoaderResult) {
-      showToast('ClassLoader URLs generated', 'success')
+      showToast(t('payload.classLoaderUrlsGenerated'), 'success')
     }
   }
 
@@ -142,7 +147,7 @@ export default function Dashboard() {
         <button
           className="sidebar-trigger-btn"
           onClick={() => setSidebarHidden(v => !v)}
-          title={sidebarHidden ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={t(sidebarHidden ? 'nav.expand' : 'nav.collapse')}
         >
           {sidebarHidden ? <MenuIcon /> : <CloseIcon />}
         </button>
@@ -152,7 +157,7 @@ export default function Dashboard() {
             <button
               className="sidebar-toggle-btn"
               onClick={() => setSidebarHidden(v => !v)}
-              title={sidebarHidden ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={t(sidebarHidden ? 'nav.expand' : 'nav.collapse')}
             >
               <span className="toggle-icon-default">
                 {sidebarHidden ? <MenuIcon /> : <CloseIcon />}
@@ -167,10 +172,10 @@ export default function Dashboard() {
                 <button
                   className={'sidebar-nav-item' + (d.mode === 'jndi' ? ' active' : '')}
                   onClick={() => d.switchMode('jndi')}
-                  title="JNDI EXP"
+                  title={t('nav.jndi')}
                 >
                   <JndiIcon />
-                  <span>JNDI EXP</span>
+                  <span>{t('nav.jndi')}</span>
                 </button>
                 <button
                   className={'sidebar-nav-item' + (d.mode === 'gadget' ? ' active' : '')}
@@ -186,9 +191,9 @@ export default function Dashboard() {
                   <WikiIcon />
                   <span>Wiki <ExternalLinkIcon /></span>
                 </a>
-                <button className="logout-btn" onClick={d.logout} title="Logout">
+                <button className="logout-btn" onClick={d.logout} title={t('nav.logout')}>
                   <LogoutIcon />
-                  <span>Logout</span>
+                  <span>{t('nav.logout')}</span>
                 </button>
               </div>
             </div>
@@ -201,7 +206,7 @@ export default function Dashboard() {
             <>
               <div style={{ display: 'flex', gap: 20, marginBottom: 20, alignItems: 'flex-start' }}>
                 <div className="glass-card section-enter" style={{ width: 200, flexShrink: 0, marginBottom: 0 }}>
-                  <h2>Server Status</h2>
+                  <h2>{t('server.status')}</h2>
                   <div className="status-grid" style={{ gridTemplateColumns: '1fr' }}>
                     {servers.map(s => (
                       <ServerStatusCard
@@ -214,7 +219,7 @@ export default function Dashboard() {
                       />
                     ))}
                     <div className="status-item">
-                      <span className="status-label">IP Address</span>
+                      <span className="status-label">{t('config.ip')}</span>
                       <span className="status-value" style={{ color: 'var(--accent)' }}>{d.status.ip || '0.0.0.0'}</span>
                     </div>
                   </div>
@@ -223,25 +228,25 @@ export default function Dashboard() {
                 <div className="glass-card section-enter" style={{ flex: 1, marginBottom: 0 }}>
                   <div className="control-bar" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className={'tab-segment-control tabs-3' + (d.activeJndiTab === 'payload' ? ' config-tab' : '') + (d.activeJndiTab === 'logs' ? ' tab-3' : '')}>
-                      <button className={'tab-segment-btn' + (d.activeJndiTab === 'config' ? ' active' : '')} onClick={() => d.setActiveJndiTab('config')}>Config</button>
-                      <button className={'tab-segment-btn' + (d.activeJndiTab === 'payload' ? ' active' : '')} onClick={() => d.setActiveJndiTab('payload')}>Payload</button>
-                      <button className={'tab-segment-btn' + (d.activeJndiTab === 'logs' ? ' active' : '')} onClick={() => d.setActiveJndiTab('logs')}>Logs</button>
+                      <button className={'tab-segment-btn' + (d.activeJndiTab === 'config' ? ' active' : '')} onClick={() => d.setActiveJndiTab('config')}>{t('config.tab')}</button>
+                      <button className={'tab-segment-btn' + (d.activeJndiTab === 'payload' ? ' active' : '')} onClick={() => d.setActiveJndiTab('payload')}>{t('payload.tab')}</button>
+                      <button className={'tab-segment-btn' + (d.activeJndiTab === 'logs' ? ' active' : '')} onClick={() => d.setActiveJndiTab('logs')}>{t('payload.logs')}</button>
                     </div>
                     {d.activeJndiTab === 'config' && (
                       <button className="btn btn-primary" style={{ width: 'auto', padding: '8px 18px', fontSize: 14 }} onClick={handleSaveConfig} disabled={d.loading}>
-                        {d.loading ? 'Saving...' : 'Save Configuration'}
+                        {d.loading ? t('config.saving') : t('config.save')}
                       </button>
                     )}
                     {d.activeJndiTab === 'payload' && d.payloadSubTab === 'gadget' && (
                       <button className="btn btn-primary" style={{ width: 'auto', padding: '8px 18px', fontSize: 14 }} onClick={handleGenerateJndiPayload}
                         disabled={d.loading || !(d.jndiGadgetInput || d.selectedGadget).trim() || !d.payloadCmd}>
-                        {d.loading ? 'Generating...' : 'Generate'}
+                        {d.loading ? t('payload.generating') : t('payload.generate')}
                       </button>
                     )}
                     {d.activeJndiTab === 'payload' && d.payloadSubTab === 'classloader' && (
                       <button className="btn btn-primary" style={{ width: 'auto', padding: '8px 18px', fontSize: 14 }} onClick={handleGenerateClassLoader}
                         disabled={d.loading || !d.filePath.trim() || !d.routing.trim()}>
-                        {d.loading ? 'Generating...' : 'Generate'}
+                        {d.loading ? t('payload.generating') : t('payload.generate')}
                       </button>
                     )}
                   </div>
@@ -274,8 +279,8 @@ export default function Dashboard() {
                             selectedGadget={d.selectedGadget}
                           />
                           <div className="form-group input-icon-wrap">
-                            <label>Command</label>
-                            <textarea rows={4} value={d.payloadCmd} placeholder="e.g. whoami"
+                            <label>{t('payload.command')}</label>
+                            <textarea rows={4} value={d.payloadCmd} placeholder={t('payload.jndiCommandPlaceholder')}
                               onChange={e => d.setPayloadCmd(e.target.value)} />
                             <span className="input-icon" style={{ top: 38 }}><CommandIcon /></span>
                           </div>
@@ -294,12 +299,12 @@ export default function Dashboard() {
                             open={d.routingOpen}
                             onOpenChange={d.setRoutingOpen}
                             selectedGadget={d.routing}
-                            label="Routing"
+                            label={t('classloader.routing')}
                           />
                           <div className="form-group input-icon-wrap">
-                            <label>FilePath</label>
+                            <label>{t('classloader.filePath')}</label>
                             <input type="text" value={d.filePath}
-                              placeholder="e.g. /Evil.class"
+                              placeholder={t('classloader.filePathPlaceholder')}
                               onChange={e => d.setFilePath(e.target.value)} />
                             <span className="input-icon"><FileIcon /></span>
                           </div>
@@ -314,15 +319,15 @@ export default function Dashboard() {
                   {d.activeJndiTab === 'logs' && (
                     <div key="jndi-logs" className="tab-content-enter">
                       <div className="log-header">
-                        <span>Server Events</span>
+                        <span>{t('logs.events')}</span>
                         <button className="btn btn-secondary" style={{ padding: '4px 12px', fontSize: 11, width: 'auto' }}
                           onClick={d.fetchLogs} disabled={d.logLoading}>
-                          {d.logLoading ? 'Loading...' : 'Refresh'}
+                          {d.logLoading ? t('logs.loading') : t('logs.refresh')}
                         </button>
                       </div>
                       <div className="log-container">
                         {d.logLines.length === 0 ? (
-                          <div className="log-empty">No events yet. Start a server or wait for incoming requests.</div>
+                          <div className="log-empty">{t('logs.empty')}</div>
                         ) : (
                           d.logLines.map((line, i) => (
                             <div key={i} className="log-line">{line}</div>
@@ -341,18 +346,18 @@ export default function Dashboard() {
             <div className="gadget-layout" style={{ display: 'flex', gap: 'var(--card-gap)', alignItems: 'flex-start' }}>
               <div className="glass-card section-enter" style={{ flex: 3, marginBottom: 0 }}>
                 <div className="header" style={{ padding: 0, marginBottom: 16 }}>
-                  <h2>Payload Generator</h2>
+                  <h2>{t('payload.generator')}</h2>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <button
                       className={`btn btn-secondary${d.showAdvanced ? ' active-tab' : ''}`}
                       style={{ padding: '6px 14px', fontSize: 12, width: 'auto' }}
                       onClick={() => d.setShowAdvanced(v => !v)}
                     >
-                      {d.showAdvanced ? 'Hide Options' : 'Advanced Options'}
+                      {t(d.showAdvanced ? 'payload.hideAdvanced' : 'payload.advanced')}
                     </button>
                     <button className="btn btn-primary" style={{ width: 'auto', padding: '8px 18px', fontSize: 14 }} onClick={handleGeneratePayload}
                       disabled={d.loading || !(d.gadgetModeInput || d.selectedGadget).trim()}>
-                      {d.loading ? 'Generating...' : 'Generate'}
+                      {d.loading ? t('payload.generating') : t('payload.generate')}
                     </button>
                   </div>
                 </div>
@@ -366,57 +371,58 @@ export default function Dashboard() {
                       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); d.setEncodeBase64(v => !v); } }}>
                       <div className="base64-toggle-thumb" />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Base64 Encode Output</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>{t('payload.base64Output')}</span>
                   </label>
                 </div>
 
                 {d.showAdvanced && (
                   <div className="advanced-section section-enter">
                     <div className="adv-grid">
+                      <ExecutionModeSelector value={d.executionMode} onChange={d.setExecutionMode} />
                       <label className="adv-check">
                         <input type="checkbox" checked={d.inherit} onChange={e => d.setInherit(e.target.checked)} />
-                        <span>Inherit AbstractTranslet <em>(-i)</em></span>
+                        <span>{t('payload.inherit')} <em>(-i)</em></span>
                       </label>
                       <label className="adv-check">
                         <input type="checkbox" checked={d.obscure} onChange={e => d.setObscure(e.target.checked)} />
-                        <span>Obscure (reflection bypass RASP) <em>(-o)</em></span>
+                        <span>{t('payload.obscure')} <em>(-o)</em></span>
                       </label>
                       <label className="adv-check">
                         <input type="checkbox" checked={d.noComSun} onChange={e => d.setNoComSun(e.target.checked)} />
-                        <span>Force org.apache.XXX.TemplatesImpl <em>(-ncs)</em></span>
+                        <span>{t('payload.noComSun')} <em>(-ncs)</em></span>
                       </label>
                       <label className="adv-check">
                         <input type="checkbox" checked={d.mozillaClassLoader} onChange={e => d.setMozillaClassLoader(e.target.checked)} />
-                        <span>Mozilla DefiningClassLoader <em>(-mcl)</em></span>
+                        <span>{t('payload.mozilla')} <em>(-mcl)</em></span>
                       </label>
                       <label className="adv-check">
                         <input type="checkbox" checked={d.rhino} onChange={e => d.setRhino(e.target.checked)} />
-                        <span>Rhino Engine <em>(-rh)</em></span>
+                        <span>{t('payload.rhino')} <em>(-rh)</em></span>
                       </label>
                       <label className="adv-check">
                         <input type="checkbox" checked={d.utf8Overlong} onChange={e => d.setUtf8Overlong(e.target.checked)} />
-                        <span>UTF-8 Overlong Encoding <em>(-utf)</em></span>
+                        <span>{t('payload.utf8')} <em>(-utf)</em></span>
                       </label>
                     </div>
                     <div className="adv-grid" style={{ gridTemplateColumns: '1fr 1fr', marginTop: 10 }}>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: 12 }}>DefineClassFromParameter <em>(-dcfp)</em></label>
-                        <input type="text" value={d.dcfp} placeholder="parameter name"
+                        <label style={{ fontSize: 12 }}>{t('payload.defineClass')} <em>(-dcfp)</em></label>
+                        <input type="text" value={d.dcfp} placeholder={t('payload.parameterName')}
                           onChange={e => d.setDcfp(e.target.value)} />
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: 12 }}>Dirty Type <em>(-dt)</em></label>
+                        <label style={{ fontSize: 12 }}>{t('payload.dirtyType')} <em>(-dt)</em></label>
                         <select value={d.dirtyType} onChange={e => d.setDirtyType(e.target.value)}
                           style={{ width: '100%', padding: '9px 12px', borderRadius: 'var(--input-radius)', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}>
-                          <option value="">None</option>
-                          <option value="1">1: Random Hashable Collections</option>
-                          <option value="2">2: LinkedList Nesting</option>
-                          <option value="3">3: TC_RESET in Serialized Data</option>
+                          <option value="">{t('payload.none')}</option>
+                          <option value="1">{t('payload.dirtyRandom')}</option>
+                          <option value="2">{t('payload.dirtyLinkedList')}</option>
+                          <option value="3">{t('payload.dirtyReset')}</option>
                         </select>
                       </div>
                       <div className="form-group" style={{ marginBottom: 0 }}>
-                        <label style={{ fontSize: 12 }}>Dirty Length <em>(-dl)</em></label>
-                        <input type="number" value={d.dirtyLength} placeholder="length/counts"
+                        <label style={{ fontSize: 12 }}>{t('payload.dirtyLength')} <em>(-dl)</em></label>
+                        <input type="number" value={d.dirtyLength} placeholder={t('payload.dirtyLengthPlaceholder')}
                           onChange={e => d.setDirtyLength(e.target.value)} />
                       </div>
                       <div></div>
@@ -437,15 +443,18 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="form-group input-icon-wrap">
-                  <label>Command</label>
-                  <textarea rows={4} value={d.payloadCmd} placeholder="e.g. whoami"
+                  <label>{t('payload.command')}</label>
+                  <textarea rows={4} value={d.payloadCmd} placeholder={t('payload.commandPlaceholder')}
                     onChange={e => d.setPayloadCmd(e.target.value)} />
                   <span className="input-icon" style={{ top: 38 }}><CommandIcon /></span>
                 </div>
+                <div className="command-hint">
+                  {t('payload.commandHint')} {executionMode.encodeBase64 && t('payload.autoBase64')}
+                </div>
                 <div className="form-group input-icon-wrap">
-                  <label>Save As (leave empty to discard)</label>
+                  <label>{t('payload.saveAs')}</label>
                   <input type="text" value={d.saveFilename}
-                    placeholder="e.g. payload.ser"
+                    placeholder={t('payload.saveAsPlaceholder')}
                     onChange={e => d.setSaveFilename(e.target.value)} />
                   <span className="input-icon"><FileIcon /></span>
                 </div>
@@ -453,10 +462,10 @@ export default function Dashboard() {
               </div>
               <div className="glass-card section-enter" style={{ flex: 2, marginBottom: 0 }}>
                 <div className="header" style={{ padding: 0, marginBottom: 16 }}>
-                  <h2>File Manager</h2>
+                  <h2>{t('files.manager')}</h2>
                   <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: 11, width: 'auto' }}
                     onClick={d.fetchFiles} disabled={d.filesLoading}>
-                    {d.filesLoading ? 'Loading...' : 'Refresh'}
+                    {d.filesLoading ? t('logs.loading') : t('logs.refresh')}
                   </button>
                 </div>
                 <div
@@ -472,20 +481,20 @@ export default function Dashboard() {
                     style={{ display: 'none' }}
                     onChange={d.handleFileSelect}
                   />
-                  {d.uploading ? <span>Uploading...</span> : <span>Drop file here or click to upload</span>}
+                  {d.uploading ? <span>{t('files.uploading')}</span> : <span>{t('files.upload')}</span>}
                 </div>
                 <div className="file-list">
                   {d.files.length === 0 ? (
-                    <div className="file-empty">No saved files</div>
+                    <div className="file-empty">{t('files.empty')}</div>
                   ) : (
                     d.files.map(f => (
                       <div key={f.name} className="file-row">
                         <span className="file-name" title={f.name}>{f.name}</span>
                         <span className="file-size">{f.size > 1024 ? (f.size / 1024).toFixed(1) + ' KB' : f.size + ' B'}</span>
-                        <button className="file-btn" onClick={() => d.handleDownloadFile(f.name)} title="Download">
+                        <button className="file-btn" onClick={() => d.handleDownloadFile(f.name)} title={t('files.download')}>
                           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 7l4 4 4-4M2 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </button>
-                        <button className="file-btn file-btn-del" onClick={() => d.handleDeleteFile(f.name)} title="Delete">
+                        <button className="file-btn file-btn-del" onClick={() => d.handleDeleteFile(f.name)} title={t('files.delete')}>
                           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3h4v2M5 5v8h6V5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </button>
                       </div>

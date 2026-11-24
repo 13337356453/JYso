@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, setAuthToken } from '../api'
 import ParticleBackground from '../components/ParticleBackground'
+import { useLanguage } from '../context/LanguageContext'
 
 const SpinnerIcon = () => (
   <svg className="btn-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -11,6 +12,7 @@ const SpinnerIcon = () => (
 
 export default function Login() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const [username, setUsername] = useState('qi')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -26,19 +28,19 @@ export default function Login() {
         setAuthToken(res.data.token)
         navigate('/dashboard', { replace: true })
       } else {
-        setError('Unexpected response from server')
+        setError(t('login.unexpectedResponse'))
       }
     } catch (e) {
       if (e.response) {
         if (e.response.status === 401) {
-          setError('Invalid username or password.')
+          setError(t('login.invalidCredentials'))
         } else {
-          setError('Server error: ' + e.response.status)
+          setError(t('login.serverError', { status: e.response.status }))
         }
       } else if (e.request) {
-        setError('Cannot connect to server. Is it running?')
+        setError(t('login.connectionError'))
       } else {
-        setError('Error: ' + e.message)
+        setError(t('login.error', { message: e.message }))
       }
       setPassword('')
     } finally {
@@ -52,36 +54,36 @@ export default function Login() {
       <div className="login-acrylic-card">
         <div className="login-inner">
           <h1>JYso</h1>
-          <p className="subtitle">JNDI Exploitation Toolkit</p>
-          <p className="tagline">Sign in to access the dashboard</p>
+          <p className="subtitle">{t('login.subtitle')}</p>
+          <p className="tagline">{t('login.tagline')}</p>
           {error && <div className="error-msg">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Username</label>
+              <label>{t('login.username')}</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder="Enter username"
+                placeholder={t('login.usernamePlaceholder')}
               />
             </div>
             <div className="form-group">
-              <label>Password</label>
+              <label>{t('login.password')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder={t('login.passwordPlaceholder')}
               />
             </div>
             <button className="btn btn-primary" type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <SpinnerIcon />
-                  Signing in...
+                  {t('login.signingIn')}
                 </>
               ) : (
-                'Sign In'
+                t('login.signIn')
               )}
             </button>
           </form>

@@ -1,3 +1,5 @@
+import { useLanguage } from '../context/LanguageContext'
+
 const SearchIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -5,14 +7,16 @@ const SearchIcon = () => (
 )
 
 export default function GadgetSelector({ value, onChange, items, searchValue, onSearchChange, open, onOpenChange, selectedGadget, label }) {
+  const { t } = useLanguage()
+
   return (
     <div style={{ position: 'relative' }}>
       <div className="form-group input-icon-wrap">
-        <label>{label || 'Gadget'}</label>
+        <label>{label || t('gadget.label')}</label>
         <input
           type="text"
           value={value}
-          placeholder="Type or search..."
+          placeholder={t('gadget.search')}
           onFocus={() => onOpenChange(true)}
           onBlur={() => setTimeout(() => onOpenChange(false), 150)}
           onChange={e => { onChange(e.target.value); if (onSearchChange) onSearchChange(e.target.value); }}
